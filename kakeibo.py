@@ -1,8 +1,31 @@
-# CLI家計簿アプリ - 最小版（データはメモリ上のみ。終了すると消える）
+# CLI家計簿アプリ - ファイル保存対応版
+import json
+import os
+
+# 保存先ファイル名。あちこちに直書きせず1か所にまとめておくと、後で変えたくなっても1行で済む
+FILE_NAME = "kakeibo.json"
+
+
+def load_expenses():
+    """ファイルから支出データを読み込む（起動時に1回だけ呼ぶ）"""
+    # ファイルがまだ無い＝初回起動。空のリストから始める
+    if not os.path.exists(FILE_NAME):
+        return []
+    with open(FILE_NAME, "r", encoding="utf-8") as f:
+        return json.load(f)  # JSONテキスト → Pythonのリスト・辞書に変換
+
+
+def save_expenses():
+    """支出データをファイルに書き出す（追加のたびに呼ぶ）"""
+    with open(FILE_NAME, "w", encoding="utf-8") as f:
+        # ensure_ascii=False で日本語をそのまま保存（指定しないと読めない文字コードになる）
+        # indent=2 は人間が読みやすいよう改行と字下げを入れる指定
+        json.dump(expenses, f, ensure_ascii=False, indent=2)
+
 
 # 支出を貯めておくリスト。1件の支出は {"item": 品名, "amount": 金額} という辞書で表す。
-# 「品名と金額はセットで1つのモノ」なので、バラバラの変数ではなく辞書でまとめる。
-expenses = []
+# 起動時にファイルから復元するのがポイント（前回のデータがここで蘇る）
+expenses = load_expenses()
 
 
 def add_expense():
@@ -11,6 +34,7 @@ def add_expense():
     # input()の戻り値は必ず文字列なので、計算に使えるようint（整数）に変換する
     amount = int(input("いくら？（円） > "))
     expenses.append({"item": item, "amount": amount})
+    save_expenses()  # 追加したら即ファイルへ。これで終了してもデータが残る
     print(f"記録しました：{item} {amount}円")
 
 
