@@ -31,8 +31,13 @@ expenses = load_expenses()
 def add_expense():
     """支出を1件追加する"""
     item = input("何に使った？ > ")
-    # input()の戻り値は必ず文字列なので、計算に使えるようint（整数）に変換する
-    amount = int(input("いくら？（円） > "))
+    # input()の戻り値は必ず文字列なので、計算に使えるようint（整数）に変換する。
+    # ただし "abc" などは変換できずValueErrorで落ちるので、try/exceptで受け止める
+    try:
+        amount = int(input("いくら？（円） > "))
+    except ValueError:
+        print("金額は半角の数字で入力してください（例: 500）")
+        return  # 記録せずにメニューへ戻る
     expenses.append({"item": item, "amount": amount})
     save_expenses()  # 追加したら即ファイルへ。これで終了してもデータが残る
     print(f"記録しました：{item} {amount}円")
