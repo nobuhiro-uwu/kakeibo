@@ -14,7 +14,7 @@ test_data = [
 # assert = 「これは真のはず。違ったらエラーで止まって教えて」という宣言
 
 # テスト1: 基本の動き。7月分だけ足されるか（800 + 1500 = 2300）
-assert calc_monthly_total(test_data, "2026-07") == 9999
+assert calc_monthly_total(test_data, "2026-07") == 2300
 
 # テスト2: 境界の確認。6/30は「先月」として7月に混ざらないか
 assert calc_monthly_total(test_data, "2026-06") == 2000
