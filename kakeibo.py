@@ -63,14 +63,24 @@ def show_expenses():
     print(f"合計: {total}円")
 
 
-def show_monthly_total():
-    """今月の支出だけを合計して表示する"""
-    this_month = str(date.today())[:7]  # "2026-07-08" → "2026-07"（先頭7文字）
+def calc_monthly_total(expense_list, month):
+    """指定した月（"2026-07" 形式）の支出合計を計算して返す。
+
+    printせず数値をreturnするだけ・グローバル変数に触らず引数だけを見る、
+    という作りにしてあるのは、テストコードから答え合わせできるようにするため
+    """
     total = 0
-    for e in expenses:
-        # 日付の先頭7文字が今月と一致するものだけ足す。日付なしの古いデータは対象外
-        if e.get("date", "")[:7] == this_month:
+    for e in expense_list:
+        # 日付の先頭7文字が指定月と一致するものだけ足す。日付なしの古いデータは対象外
+        if e.get("date", "")[:7] == month:
             total += e["amount"]
+    return total
+
+
+def show_monthly_total():
+    """今月の支出合計を表示する（計算はcalc_monthly_totalに任せる）"""
+    this_month = str(date.today())[:7]  # "2026-07-08" → "2026-07"（先頭7文字）
+    total = calc_monthly_total(expenses, this_month)
     print(f"{this_month} の合計: {total}円")
 
 
