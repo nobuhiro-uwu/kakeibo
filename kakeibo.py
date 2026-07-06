@@ -55,10 +55,12 @@ def show_expenses():
 
     print("---- 支出一覧 ----")
     total = 0
-    for e in expenses:
+    # enumerate(リスト, start=1) = 「1から番号を振りながらループする」書き方。
+    # この番号は削除機能で「何番を消す？」の指定にも使う
+    for i, e in enumerate(expenses, start=1):
         # e["date"] だと日付を保存していなかった頃のデータでエラーになる。
         # .get() なら無いときに "日付なし" を返してくれるので、古いデータも表示できる
-        print(f"{e.get('date', '日付なし')} {e['item']}: {e['amount']}円")
+        print(f"{i}. {e.get('date', '日付なし')} {e['item']}: {e['amount']}円")
         total += e["amount"]
     print(f"合計: {total}円")
 
@@ -77,6 +79,37 @@ def calc_monthly_total(expense_list, month):
     return total
 
 
+def delete_expense(expense_list, number):
+    """number番目（1始まり）の支出を削除し、削除した1件を返す。無効な番号ならNoneを返す。
+
+    calc_monthly_totalと同じく、input/printをせず引数と戻り値だけで完結させて
+    テストできる形にしてある
+    """
+    if number < 1 or number > len(expense_list):
+        return None
+    # 人間の「1番目」はリストでは[0]。この -1 を忘れるのが定番のオフバイワンエラー
+    return expense_list.pop(number - 1)
+
+
+def delete_expense_menu():
+    """一覧を見せて番号を聞き、支出を1件削除する（対話部分の担当）"""
+    if not expenses:
+        print("まだ記録がありません")
+        return
+    show_expenses()
+    try:
+        number = int(input("削除する番号 > "))
+    except ValueError:
+        print("番号は半角の数字で入力してください")
+        return
+    deleted = delete_expense(expenses, number)
+    if deleted is None:
+        print(f"1〜{len(expenses)} の番号を入力してください")
+        return
+    save_expenses()  # 消した結果もファイルに反映しないと、再起動で復活してしまう
+    print(f"削除しました：{deleted['item']} {deleted['amount']}円")
+
+
 def show_monthly_total():
     """今月の支出合計を表示する（計算はcalc_monthly_totalに任せる）"""
     this_month = str(date.today())[:7]  # "2026-07-08" → "2026-07"（先頭7文字）
@@ -88,7 +121,7 @@ def main():
     """メニューを表示し続けるメインループ"""
     # while True = 無限ループ。「終了」が選ばれるまでメニューを出し続ける
     while True:
-        print("\n[1] 支出を追加  [2] 一覧を見る  [3] 今月の合計  [4] 終了")
+        print("\n[1] 支出を追加  [2] 一覧を見る  [3] 今月の合計  [4] 削除  [5] 終了")
         choice = input("番号を選んでください > ")
 
         if choice == "1":
@@ -98,10 +131,12 @@ def main():
         elif choice == "3":
             show_monthly_total()
         elif choice == "4":
+            delete_expense_menu()
+        elif choice == "5":
             print("お疲れさまでした！")
             break  # ループを抜ける＝プログラム終了
         else:
-            print("1〜4の番号を入力してください")
+            print("1〜5の番号を入力してください")
 
 
 # このファイルが直接実行されたときだけmain()を動かす、Pythonの定型文
