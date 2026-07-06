@@ -1,6 +1,7 @@
 # CLI家計簿アプリ - ファイル保存対応版
 import json
 import os
+from datetime import date  # 今日の日付を取るために使う
 
 # 保存先ファイル名。あちこちに直書きせず1か所にまとめておくと、後で変えたくなっても1行で済む
 FILE_NAME = "kakeibo.json"
@@ -38,9 +39,12 @@ def add_expense():
     except ValueError:
         print("金額は半角の数字で入力してください（例: 500）")
         return  # 記録せずにメニューへ戻る
-    expenses.append({"item": item, "amount": amount})
+    # str(date.today()) は "2026-07-08" のようなISO形式の文字列になる。
+    # 文字列にして保存するのは、JSONが日付型を直接は扱えないため
+    today = str(date.today())
+    expenses.append({"item": item, "amount": amount, "date": today})
     save_expenses()  # 追加したら即ファイルへ。これで終了してもデータが残る
-    print(f"記録しました：{item} {amount}円")
+    print(f"記録しました：{today} {item} {amount}円")
 
 
 def show_expenses():
@@ -52,16 +56,29 @@ def show_expenses():
     print("---- 支出一覧 ----")
     total = 0
     for e in expenses:
-        print(f"{e['item']}: {e['amount']}円")
+        # e["date"] だと日付を保存していなかった頃のデータでエラーになる。
+        # .get() なら無いときに "日付なし" を返してくれるので、古いデータも表示できる
+        print(f"{e.get('date', '日付なし')} {e['item']}: {e['amount']}円")
         total += e["amount"]
     print(f"合計: {total}円")
+
+
+def show_monthly_total():
+    """今月の支出だけを合計して表示する"""
+    this_month = str(date.today())[:7]  # "2026-07-08" → "2026-07"（先頭7文字）
+    total = 0
+    for e in expenses:
+        # 日付の先頭7文字が今月と一致するものだけ足す。日付なしの古いデータは対象外
+        if e.get("date", "")[:7] == this_month:
+            total += e["amount"]
+    print(f"{this_month} の合計: {total}円")
 
 
 def main():
     """メニューを表示し続けるメインループ"""
     # while True = 無限ループ。「終了」が選ばれるまでメニューを出し続ける
     while True:
-        print("\n[1] 支出を追加  [2] 一覧を見る  [3] 終了")
+        print("\n[1] 支出を追加  [2] 一覧を見る  [3] 今月の合計  [4] 終了")
         choice = input("番号を選んでください > ")
 
         if choice == "1":
@@ -69,10 +86,12 @@ def main():
         elif choice == "2":
             show_expenses()
         elif choice == "3":
+            show_monthly_total()
+        elif choice == "4":
             print("お疲れさまでした！")
             break  # ループを抜ける＝プログラム終了
         else:
-            print("1〜3の番号を入力してください")
+            print("1〜4の番号を入力してください")
 
 
 # このファイルが直接実行されたときだけmain()を動かす、Pythonの定型文
