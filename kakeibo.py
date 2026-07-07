@@ -6,6 +6,10 @@ from datetime import date  # 今日の日付を取るために使う
 # 保存先ファイル名。あちこちに直書きせず1か所にまとめておくと、後で変えたくなっても1行で済む
 FILE_NAME = "kakeibo.json"
 
+# カテゴリは自由入力にせず固定リストから選ばせる。
+# 表記ゆれ（食費/食料/ごはん…）を防いで、あとでカテゴリごとの集計を可能にするため
+CATEGORIES = ["食費", "日用品", "交通費", "娯楽", "その他"]
+
 
 def load_expenses():
     """ファイルから支出データを読み込む（起動時に1回だけ呼ぶ）"""
@@ -29,6 +33,20 @@ def save_expenses():
 expenses = load_expenses()
 
 
+def choose_category():
+    """カテゴリ一覧を見せて1つ選んでもらう。無効な入力ならNoneを返す"""
+    for i, name in enumerate(CATEGORIES, start=1):
+        print(f"[{i}] {name}", end="  ")  # end="  " で改行せず横に並べる
+    print()  # 最後に1回だけ改行
+    try:
+        number = int(input("カテゴリ番号 > "))
+    except ValueError:
+        return None
+    if number < 1 or number > len(CATEGORIES):
+        return None
+    return CATEGORIES[number - 1]  # 人間の1番目はリストの[0]。削除機能と同じ -1
+
+
 def add_expense():
     """支出を1件追加する"""
     item = input("何に使った？ > ")
@@ -39,12 +57,16 @@ def add_expense():
     except ValueError:
         print("金額は半角の数字で入力してください（例: 500）")
         return  # 記録せずにメニューへ戻る
+    category = choose_category()
+    if category is None:
+        print(f"カテゴリは1〜{len(CATEGORIES)}の番号で入力してください")
+        return
     # str(date.today()) は "2026-07-08" のようなISO形式の文字列になる。
     # 文字列にして保存するのは、JSONが日付型を直接は扱えないため
     today = str(date.today())
-    expenses.append({"item": item, "amount": amount, "date": today})
+    expenses.append({"item": item, "amount": amount, "date": today, "category": category})
     save_expenses()  # 追加したら即ファイルへ。これで終了してもデータが残る
-    print(f"記録しました：{today} {item} {amount}円")
+    print(f"記録しました：{today} [{category}] {item} {amount}円")
 
 
 def show_expenses():
@@ -60,7 +82,7 @@ def show_expenses():
     for i, e in enumerate(expenses, start=1):
         # e["date"] だと日付を保存していなかった頃のデータでエラーになる。
         # .get() なら無いときに "日付なし" を返してくれるので、古いデータも表示できる
-        print(f"{i}. {e.get('date', '日付なし')} {e['item']}: {e['amount']}円")
+        print(f"{i}. {e.get('date', '日付なし')}[{e.get('category','未分類')}] {e['item']}: {e['amount']}円")
         total += e["amount"]
     print(f"合計: {total}円")
 
