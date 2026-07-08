@@ -108,6 +108,22 @@ def calc_category_total(expense_list, month, category):
             total += e["amount"]                                        # ← 12スペース
     return total                                                        # ← 4スペース
 
+def calc_totals_by_month(expense_list):
+    """月ごとの合計を辞書で返す。例: {"2026-06": 3200, "2026-07": 4800}
+
+    どの月が存在するかは事前に分からないので、支出を1件ずつ見ながら
+    「初めて出会った月は席を作り、2回目からは足し込む」方式で表を育てる
+    """
+    totals = {}  # 空の辞書からスタート。キー＝月、値＝その月の合計
+    for e in expense_list:
+        month = e.get("date", "")[:7]
+        if month != "":  # 日付なしの古いデータは月別集計に含めない
+            if month not in totals:  # in = 「このキーは辞書にもう居る？」の確認
+                totals[month] = 0  # 初登場の月は、まず0円で席を作る
+            totals[month] += e["amount"]
+    return totals
+
+
 def delete_expense(expense_list, number):
     """number番目（1始まり）の支出を削除し、削除した1件を返す。無効な番号ならNoneを返す。
 
@@ -153,6 +169,13 @@ def show_category_totals():
         total = calc_category_total(expenses, this_month, name)
         print(f"{name}: {total}円")
 
+def show_totals_by_month():
+    """月毎の合計を一覧表示する"""   
+    totals = calc_totals_by_month(expenses)
+    print("---- 月別集計 ----")
+    for month in sorted(totals):
+        print(f"{month}: {totals[month]}円")
+        
 def main():
     """メニューを表示し続けるメインループ"""
     # while True = 無限ループ。「終了」が選ばれるまでメニューを出し続ける
