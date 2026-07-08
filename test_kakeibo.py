@@ -1,6 +1,6 @@
 # kakeibo.py の計算ロジックを自動で確かめるテスト
 # 実行方法: python3 test_kakeibo.py
-from kakeibo import calc_monthly_total, delete_expense
+from kakeibo import calc_monthly_total, delete_expense, calc_category_total
 
 # テスト専用の偽データ。本物のkakeibo.jsonに依存しないことが重要。
 # （本物のデータでテストすると、支出を追加するたびに「正解」が変わってしまう）
@@ -8,7 +8,7 @@ test_data = [
     {"item": "昼食", "amount": 800, "date": "2026-07-01"},
     {"item": "本", "amount": 1500, "date": "2026-07-15"},
     {"item": "映画", "amount": 2000, "date": "2026-06-30"},  # 先月分
-    {"item": "牛乳", "amount": 200},  # 日付なしの古い形式のデータ
+    {"item": "牛乳", "amount": 200},  # 日付もカテゴリもない古い形式のデータ
 ]
 
 # assert = 「これは真のはず。違ったらエラーで止まって教えて」という宣言
@@ -47,4 +47,17 @@ assert len(delete_data) == 1  # 失敗したときに勝手に消えていない
 # テスト7: 空のリストから削除しようとしても落ちないか
 assert delete_expense([], 1) is None
 
+# ---- カテゴリ別集計のテスト ----
+
+# テスト8: 2026-07の「食費」の合計は？
+assert calc_category_total(test_data, "2026-07", "食費") == 0
+
+# テスト9: 2026-07の「娯楽」の合計は？（映画が先月なことに注意）
+assert calc_category_total(test_data, "2026-07", "娯楽") == 0
+
+# テスト10: 2026-06の「娯楽」の合計は？
+assert calc_category_total(test_data, "2026-06", "娯楽") == 0
+
+# テスト11: 1件も該当しないカテゴリは？
+assert calc_category_total(test_data, "2026-07", "交通費") == 0
 print("すべてのテストに合格しました！")

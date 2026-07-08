@@ -101,6 +101,13 @@ def calc_monthly_total(expense_list, month):
     return total
 
 
+def calc_category_total(expense_list, month, category):
+    total = 0                                                           # ← 4スペース
+    for e in expense_list:                                              # ← 4スペース
+        if e.get("date", "")[:7] == month and e.get("category", "") == category:   # ← 8スペース
+            total += e["amount"]                                        # ← 12スペース
+    return total                                                        # ← 4スペース
+
 def delete_expense(expense_list, number):
     """number番目（1始まり）の支出を削除し、削除した1件を返す。無効な番号ならNoneを返す。
 
@@ -138,12 +145,19 @@ def show_monthly_total():
     total = calc_monthly_total(expenses, this_month)
     print(f"{this_month} の合計: {total}円")
 
+def show_category_totals():
+    """今月の支出をカテゴリごとに集計して表示する"""
+    this_month = str(date.today())[:7]
+    print(f"---- {this_month} カテゴリ別集計")
+    for name in CATEGORIES:
+        total = calc_category_total(expenses, this_month, name)
+        print(f"{name}: {total}円")
 
 def main():
     """メニューを表示し続けるメインループ"""
     # while True = 無限ループ。「終了」が選ばれるまでメニューを出し続ける
     while True:
-        print("\n[1] 支出を追加  [2] 一覧を見る  [3] 今月の合計  [4] 削除  [5] 終了")
+        print("\n[1] 支出を追加  [2] 一覧を見る  [3] 今月の合計  [4] 削除  [5] カテゴリ別集計 [6] 終了")
         choice = input("番号を選んでください > ")
 
         if choice == "1":
@@ -155,10 +169,12 @@ def main():
         elif choice == "4":
             delete_expense_menu()
         elif choice == "5":
+            show_category_totals()
+        elif choice == "6":
             print("お疲れさまでした！")
             break  # ループを抜ける＝プログラム終了
         else:
-            print("1〜5の番号を入力してください")
+            print("1〜6の番号を入力してください")
 
 
 # このファイルが直接実行されたときだけmain()を動かす、Pythonの定型文
