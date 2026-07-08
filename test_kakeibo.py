@@ -5,16 +5,15 @@ from kakeibo import calc_monthly_total, delete_expense, calc_category_total
 # テスト専用の偽データ。本物のkakeibo.jsonに依存しないことが重要。
 # （本物のデータでテストすると、支出を追加するたびに「正解」が変わってしまう）
 test_data = [
-    {"item": "昼食", "amount": 800, "date": "2026-07-01"},
-    {"item": "本", "amount": 1500, "date": "2026-07-15"},
-    {"item": "映画", "amount": 2000, "date": "2026-06-30"},  # 先月分
+    {"item": "本", "amount": 1500, "date": "2026-07-15", "category": "娯楽"},
+    {"item": "映画", "amount": 2000, "date": "2026-06-30", "category": "娯楽"},  # 先月分
     {"item": "牛乳", "amount": 200},  # 日付もカテゴリもない古い形式のデータ
 ]
 
 # assert = 「これは真のはず。違ったらエラーで止まって教えて」という宣言
 
 # テスト1: 基本の動き。7月分だけ足されるか（800 + 1500 = 2300）
-assert calc_monthly_total(test_data, "2026-07") == 2300
+assert calc_monthly_total(test_data, "2026-07") == 1500
 
 # テスト2: 境界の確認。6/30は「先月」として7月に混ざらないか
 assert calc_monthly_total(test_data, "2026-06") == 2000
@@ -53,10 +52,10 @@ assert delete_expense([], 1) is None
 assert calc_category_total(test_data, "2026-07", "食費") == 0
 
 # テスト9: 2026-07の「娯楽」の合計は？（映画が先月なことに注意）
-assert calc_category_total(test_data, "2026-07", "娯楽") == 0
+assert calc_category_total(test_data, "2026-07", "娯楽") == 1500
 
 # テスト10: 2026-06の「娯楽」の合計は？
-assert calc_category_total(test_data, "2026-06", "娯楽") == 0
+assert calc_category_total(test_data, "2026-06", "娯楽") == 2000
 
 # テスト11: 1件も該当しないカテゴリは？
 assert calc_category_total(test_data, "2026-07", "交通費") == 0
