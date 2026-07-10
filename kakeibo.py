@@ -180,7 +180,7 @@ def main():
     """メニューを表示し続けるメインループ"""
     # while True = 無限ループ。「終了」が選ばれるまでメニューを出し続ける
     while True:
-        print("\n[1] 支出を追加  [2] 一覧を見る  [3] 今月の合計  [4] 削除  [5] カテゴリ別集計 [6] 終了")
+        print("\n[1] 支出を追加  [2] 一覧を見る  [3] 今月の合計  [4] 削除  [5] カテゴリ別集計 [6]月別集計 [7] 終了")
         choice = input("番号を選んでください > ")
 
         if choice == "1":
@@ -194,10 +194,12 @@ def main():
         elif choice == "5":
             show_category_totals()
         elif choice == "6":
+            show_totals_by_month()
+        elif choice == "7":
             print("お疲れさまでした！")
             break  # ループを抜ける＝プログラム終了
         else:
-            print("1〜6の番号を入力してください")
+            print("1〜7の番号を入力してください")
 
 
 # このファイルが直接実行されたときだけmain()を動かす、Pythonの定型文
