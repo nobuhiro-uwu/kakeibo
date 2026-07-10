@@ -1,6 +1,6 @@
 # kakeibo.py の計算ロジックを自動で確かめるテスト
 # 実行方法: python3 test_kakeibo.py
-from kakeibo import calc_monthly_total, delete_expense, calc_category_total
+from kakeibo import calc_monthly_total, delete_expense, calc_category_total, calc_totals_by_month
 
 # テスト専用の偽データ。本物のkakeibo.jsonに依存しないことが重要。
 # （本物のデータでテストすると、支出を追加するたびに「正解」が変わってしまう）
@@ -60,4 +60,11 @@ assert calc_category_total(test_data, "2026-06", "娯楽") == 2000
 
 # テスト11: 1件も該当しないカテゴリは？
 assert calc_category_total(test_data, "2026-07", "交通費") == 0
+
+#テスト12: 月別集計の表が正しく作られるか(日付なしの牛乳は含まれない)
+assert calc_totals_by_month(test_data) == {"2026-06": 2000, "2026-07": 2800}
+
+#テスト13:　データが空でも落ちず、空の辞書が返るか
+assert calc_totals_by_month([]) == {}
+
 print("すべてのテストに合格しました！")
